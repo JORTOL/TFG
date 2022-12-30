@@ -1,0 +1,30 @@
+  method CANTIDADES_PRODU_GET_ENTITYSET.
+
+    DATA: ls_key_tab TYPE /iwbep/s_mgw_name_value_pair.
+
+*   Comprobamos si viene por navegación desde la entidad Empresa
+    IF iv_source_name = 'Cantidades_producidas'.
+
+******     Leemos la clave de las horas hombre
+
+      IF iv_filter_string IS NOT INITIAL.
+
+        SELECT *
+          INTO CORRESPONDING FIELDS OF TABLE et_entityset
+          FROM ztpp0026
+          WHERE (iv_filter_string).
+      ELSE.
+        SELECT *
+          INTO CORRESPONDING FIELDS OF TABLE et_entityset
+          FROM ztpp0026.
+      ENDIF.
+
+
+    ELSE.
+
+      SELECT *
+         INTO CORRESPONDING FIELDS OF TABLE et_entityset
+         FROM ztpp0026.
+    ENDIF.
+
+  endmethod.

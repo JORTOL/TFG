@@ -1,0 +1,162 @@
+  METHOD /iwbep/if_mgw_appl_srv_runtime~get_expanded_entityset.
+
+**    DATA:
+**        BEGIN OF struct_response.
+**            INCLUDE            TYPE                   zcl_zppp_prodord_mpc=>ts_cantidades_producidas.
+**    DATA: navhourman TYPE STANDARD TABLE OF zcl_zppp_prodord_mpc=>ts_horas_hombre    WITH DEFAULT KEY,
+**          END OF struct_response.
+
+    DATA: lv_man_hours       TYPE zdepp_manhours,
+          lv_man_hoursmanual TYPE zdepp_manhoursmanual.
+
+
+    DATA: it_out_tab TYPE STANDARD TABLE OF zspp_odataprodord,
+          wa_out_tab LIKE LINE OF it_out_tab.
+
+***    DATA: BEGIN OF ls_contr_ch_form_details.
+***           INCLUDE TYPE zcl_zppp_prodord_cpd_ext=>str_ZTPP0026.
+***           DATA: navmaindetails TYPE zcl_zppp_prodord_cpd_ext=>str_ZTPP0026,
+***         END OF ls_contr_ch_form_details.
+*
+
+    DATA: lt_ztpp0027 TYPE TABLE OF ztpp0027.
+
+*    DATA: lt_response             LIKE TABLE OF struct_response.
+    DATA: ls_clause_horashombre   LIKE LINE  OF et_expanded_tech_clauses.
+
+
+************************IF iv_filter_string IS NOT INITIAL.
+
+    CASE iv_entity_set_name.
+      WHEN 'Cantidades_producidasSet'.
+        SELECT *
+         INTO TABLE @DATA(lt_ztpp0026)
+         FROM ztpp0026
+         WHERE (iv_filter_string).
+
+        IF lt_ztpp0026[] IS NOT INITIAL.
+          SORT lt_ztpp0026 BY custimpdate custshift custmanfac_order.
+          SELECT *
+            FROM ztpp0027 AS z27
+            INTO TABLE lt_ztpp0027
+            FOR ALL ENTRIES IN lt_ztpp0026
+            WHERE custimpdate       = lt_ztpp0026-custimpdate AND
+                  custshift         = lt_ztpp0026-custshift   AND
+                  custmanfac_order  = lt_ztpp0026-custmanfac_order.
+          IF sy-subrc = 0.
+            SORT lt_ztpp0027 BY custimpdate custshift custmanfac_order.
+          ENDIF.
+
+
+          LOOP AT lt_ztpp0026 ASSIGNING FIELD-SYMBOL(<ls_0026>).
+
+*              APPEND <ls_ztpp0027> TO wa_out_tab-tohorashombre.
+
+
+
+            LOOP AT lt_ztpp0027 ASSIGNING FIELD-SYMBOL(<ls_ztpp0027>) WHERE custimpdate = <ls_0026>-custimpdate AND
+                                                                            custshift = <ls_0026>-custshift AND
+                                                                            custmanfac_order = <ls_0026>-custmanfac_order.
+
+              lv_man_hours          = lv_man_hours + <ls_ztpp0027>-man_hours.
+              lv_man_hoursmanual    = lv_man_hoursmanual + <ls_ztpp0027>-man_hoursmanual.
+
+
+              AT END OF custmanfac_order.
+                <ls_ztpp0027>-man_hours       = lv_man_hours.
+                <ls_ztpp0027>-man_hoursmanual = lv_man_hoursmanual.
+                IF <ls_ztpp0027>-custimpdate IS INITIAL.
+                  <ls_ztpp0027>-custimpdate = sy-datum.
+                ENDIF.
+                wa_out_tab-tohorashombre  = <ls_ztpp0027>.
+
+*              APPEND <ls_ztpp0027> TO  wa_out_tab-tohorashombre.
+                CLEAR lv_man_hours.
+                CLEAR lv_man_hoursmanual.
+              ENDAT.
+
+
+            ENDLOOP.
+
+            IF <ls_0026>-custimpdate IS INITIAL.
+              <ls_0026>-custimpdate = sy-datum.
+            ENDIF.
+            wa_out_tab-custimpdate        = <ls_0026>-custimpdate.
+            wa_out_tab-custshift          = <ls_0026>-custshift.
+            wa_out_tab-custmanfac_order   = <ls_0026>-custmanfac_order.
+            wa_out_tab-customprodexp      = <ls_0026>-customprodexp.
+            wa_out_tab-cust_manfac_phase  = <ls_0026>-cust_manfac_phase.
+*            wa_out_tab-cusct_qua          = <ls_0026>-cusct_qua.
+            wa_out_tab-cust_qua_type      = <ls_0026>-cust_qua_type.
+            wa_out_tab-cust_batch_id      = <ls_0026>-cust_batch_id.
+            wa_out_tab-cust_order_st      = <ls_0026>-cust_order_st.
+*            wa_out_tab-cust_wp_lab_epx    = <ls_0026>-cust_wp_lab_epx.
+
+            wa_out_tab-sociedad           = <ls_0026>-sociedad.
+            wa_out_tab-custworkplace      = <ls_0026>-custworkplace.
+
+            wa_out_tab-cusct_qua_tot      = <ls_0026>-cusct_qua_tot.
+*            wa_out_tab-matnr              = <ls_0026>-matnr.
+            wa_out_tab-man_refer          = <ls_0026>-man_refer.
+            wa_out_tab-man_refer_name     = <ls_0026>-man_refer_name.
+            wa_out_tab-qua_plan           = <ls_0026>-qua_plan.
+            wa_out_tab-qty_captor         = <ls_0026>-qty_captor.
+            wa_out_tab-qty_manual         = <ls_0026>-qty_manual.
+            wa_out_tab-match_hcaptor      = <ls_0026>-match_hcaptor.
+            wa_out_tab-match_hcap_manual  = <ls_0026>-match_hcap_manual.
+
+
+
+
+
+            APPEND wa_out_tab TO it_out_tab.
+            CLEAR wa_out_tab.
+          ENDLOOP.
+
+          IF it_out_tab[] IS NOT INITIAL.
+            SORT it_out_tab BY custworkplace.
+          ENDIF.
+
+***
+***          LOOP AT lt_ztpp0027 ASSIGNING FIELD-SYMBOL(<ls_0027>).
+***            READ TABLE lt_ztpp0026 WITH KEY custimpdate = <ls_0027>-custimpdate
+***                                            custshift = <ls_0027>-custshift
+***                                            custmanfac_order = <ls_0027>-custmanfac_order BINARY SEARCH ASSIGNING FIELD-SYMBOL(<ls_0026>).
+***            IF sy-subrc = 0.
+***              struct_response-custimpdate       = <ls_0026>-custimpdate.
+***              struct_response-custshift         = <ls_0026>-custshift.
+***              struct_response-custmanfac_order  = <ls_0026>-custmanfac_order.
+***              struct_response-customprodexp     = <ls_0026>-customprodexp.
+***              struct_response-cust_manfac_phase = <ls_0026>-cust_manfac_phase.
+***              struct_response-cusct_qua         = <ls_0026>-cusct_qua.
+***              struct_response-cust_qua_type     = <ls_0026>-cust_qua_type.
+***              struct_response-cust_batch_id     = <ls_0026>-cust_batch_id.
+***              struct_response-cust_order_st     = <ls_0026>-cust_order_st.
+***              struct_response-cust_wp_lab_epx   = <ls_0026>-cust_wp_lab_epx.
+***              struct_response-custworkplace    = <ls_0026>-custworkplace.
+***              struct_response-sociedad          = <ls_0026>-sociedad.
+***              struct_response-cusct_qua_tot     = <ls_0026>-cusct_qua_tot.
+***              APPEND <ls_0027> TO struct_response-navhourman.
+***              APPEND struct_response TO lt_response.
+***              CLEAR struct_response.
+***            ENDIF.
+***
+***          ENDLOOP.
+***        ENDIF.
+
+******        ls_clause_horashombre     = 'NAVDOCTYP'.
+*****        ls_clause_horashombre     = 'TOHORASHOMBRE'.
+*****        APPEND ls_clause_horashombre   TO et_expanded_tech_clauses.
+*****        CLEAR ls_clause_horashombre.
+
+          copy_data_to_ref(
+            EXPORTING
+*            is_data = lt_response
+                is_data = it_out_tab
+            CHANGING
+              cr_data = er_entityset ).
+
+        ENDIF.
+    ENDCASE.
+**********************ENDIF.
+  ENDMETHOD.

@@ -1,0 +1,10 @@
+/* Enter your custom styles here */
+
+.boton-tolsa{
+    border: 0px solid darkgoldenrod;
+    border-bottom: 4px solid;
+    border-color: darkgoldenrod;
+    border-radius: 0.2rem;
+    color: #333333;
+
+}

@@ -1,0 +1,7 @@
+  method CONSTRUCTOR.
+
+mv_bukrs      = iv_bukrs.
+mv_aufnr_max  = iv_aufnr_max.
+mv_aufnr_min  = iv_aufnr_min.
+
+  endmethod.

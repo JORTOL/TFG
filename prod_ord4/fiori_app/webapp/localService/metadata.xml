@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:sap="http://www.sap.com/Protocols/SAPData">
+ <edmx:DataServices m:DataServiceVersion="2.0">
+  <Schema Namespace="ZPPP_PRODORD_SRV" xml:lang="en" sap:schema-version="1" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+   <EntityType Name="Cantidades_producidas" sap:content-version="1">
+    <Key>
+     <PropertyRef Name="Custimpdate"/>
+     <PropertyRef Name="Custshift"/>
+     <PropertyRef Name="CustmanfacOrder"/>
+    </Key>
+    <Property Name="Custimpdate" Type="Edm.DateTime" Nullable="false" Precision="7" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Werks" Type="Edm.String" MaxLength="4" sap:unicode="false" sap:label="Plant" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="ManRefer" Type="Edm.String" MaxLength="10" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Custshift" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Shift" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="ManReferName" Type="Edm.String" MaxLength="15" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="CustmanfacOrder" Type="Edm.String" Nullable="false" MaxLength="12" sap:unicode="false" sap:label="Order" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="MatchHcapManual" Type="Edm.Int32" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Customprodexp" Type="Edm.Int32" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="CustManfacPhase" Type="Edm.Int32" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="CustQuaType" Type="Edm.String" MaxLength="15" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="CustBatchId" Type="Edm.String" MaxLength="1" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="CustOrderSt" Type="Edm.String" MaxLength="5" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Sociedad" Type="Edm.String" MaxLength="4" sap:unicode="false" sap:label="Company Code" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Custworkplace" Type="Edm.String" MaxLength="10" sap:unicode="false" sap:label="Line" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="CusctQuaTot" Type="Edm.Int32" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="QuaPlan" Type="Edm.Int32" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="QtyCaptor" Type="Edm.Int32" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="QtyManual" Type="Edm.Int32" sap:unicode="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="MatchHcaptor" Type="Edm.Int32" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <NavigationProperty Name="ToHorasHombre" Relationship="ZPPP_PRODORD_SRV.QuantityHourMan" FromRole="FromRole_QuantityHourMan" ToRole="ToRole_QuantityHourMan"/>
+   </EntityType>
+   <EntityType Name="Horas_hombre" sap:content-version="1">
+    <Key>
+     <PropertyRef Name="Custshift"/>
+     <PropertyRef Name="CustmanfacOrder"/>
+    </Key>
+    <Property Name="Werks" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Plant" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Custimpdate" Type="Edm.DateTime" Precision="7" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Custshift" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Shift" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="CustmanfacOrder" Type="Edm.String" Nullable="false" MaxLength="12" sap:unicode="false" sap:label="Order" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="CustWorker" Type="Edm.String" Nullable="false" MaxLength="12" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Customprodexp" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="CustManfacPhase" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="CustMaq" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Line" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Bukrs" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Company Code" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="ManHours" Type="Edm.Int16" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="ManHoursmanual" Type="Edm.Int16" Nullable="false" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+   </EntityType>
+   <EntityType Name="Centros_Sucursales" sap:content-version="1">
+    <Key>
+     <PropertyRef Name="Werks"/>
+     <PropertyRef Name="Name1"/>
+    </Key>
+    <Property Name="Werks" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Plant" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Name1" Type="Edm.String" Nullable="false" MaxLength="30" sap:unicode="false" sap:label="Name 1" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+   </EntityType>
+   <EntityType Name="Turnos" sap:content-version="1">
+    <Key>
+     <PropertyRef Name="Custshift"/>
+    </Key>
+    <Property Name="Custshift" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Shift" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="DesTurno" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Spras" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="Language" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+   </EntityType>
+   <EntityType Name="Totales_maquina" sap:content-version="1">
+    <Key>
+     <PropertyRef Name="Custimpdate"/>
+     <PropertyRef Name="Werks"/>
+     <PropertyRef Name="Custshift"/>
+     <PropertyRef Name="CustmanfacOrder"/>
+     <PropertyRef Name="Custworkplace"/>
+    </Key>
+    <Property Name="Custimpdate" Type="Edm.DateTime" Nullable="false" Precision="7" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Werks" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Plant" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Custshift" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Shift" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="CustmanfacOrder" Type="Edm.String" Nullable="false" MaxLength="12" sap:unicode="false" sap:label="Order" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Custworkplace" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Line" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="CusctQuaTot" Type="Edm.Int32" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="ManHours" Type="Edm.Int16" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+    <Property Name="Stoppages" Type="Edm.Int32" sap:unicode="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+   </EntityType>
+   <Association Name="QuantityHourMan" sap:content-version="1">
+    <End Type="ZPPP_PRODORD_SRV.Cantidades_producidas" Multiplicity="1" Role="FromRole_QuantityHourMan"/>
+    <End Type="ZPPP_PRODORD_SRV.Horas_hombre" Multiplicity="1" Role="ToRole_QuantityHourMan"/>
+    <ReferentialConstraint>
+     <Principal Role="FromRole_QuantityHourMan">
+      <PropertyRef Name="CustmanfacOrder"/>
+      <PropertyRef Name="Custshift"/>
+      <PropertyRef Name="Custimpdate"/>
+     </Principal>
+     <Dependent Role="ToRole_QuantityHourMan">
+      <PropertyRef Name="CustmanfacOrder"/>
+      <PropertyRef Name="Custshift"/>
+      <PropertyRef Name="Custimpdate"/>
+     </Dependent>
+    </ReferentialConstraint>
+   </Association>
+   <EntityContainer Name="ZPPP_PRODORD_SRV_Entities" m:IsDefaultEntityContainer="true" sap:supported-formats="atom json xlsx">
+    <EntitySet Name="Cantidades_producidasSet" EntityType="ZPPP_PRODORD_SRV.Cantidades_producidas" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+    <EntitySet Name="Horas_hombreSet" EntityType="ZPPP_PRODORD_SRV.Horas_hombre" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+    <EntitySet Name="Centros_SucursalesSet" EntityType="ZPPP_PRODORD_SRV.Centros_Sucursales" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+    <EntitySet Name="TurnosSet" EntityType="ZPPP_PRODORD_SRV.Turnos" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+    <EntitySet Name="Totales_maquinaSet" EntityType="ZPPP_PRODORD_SRV.Totales_maquina" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+    <AssociationSet Name="QuantityHourManSet" Association="ZPPP_PRODORD_SRV.QuantityHourMan" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+     <End EntitySet="Cantidades_producidasSet" Role="FromRole_QuantityHourMan"/>
+     <End EntitySet="Horas_hombreSet" Role="ToRole_QuantityHourMan"/>
+    </AssociationSet>
+   </EntityContainer>
+   <atom:link rel="self" href="http://TGRP2SAPFG.tolsa.com:8000/sap/opu/odata/sap/ZPPP_PRODORD_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
+   <atom:link rel="latest-version" href="http://TGRP2SAPFG.tolsa.com:8000/sap/opu/odata/sap/ZPPP_PRODORD_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
+  </Schema>
+ </edmx:DataServices>
+</edmx:Edmx>

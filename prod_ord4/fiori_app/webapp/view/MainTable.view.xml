@@ -1,0 +1,100 @@
+<mvc:View
+	controllerName=""
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	
+	displayBlock="true"
+	height="100%"
+	busyIndicatorDelay="0"
+>
+<Page id="page" title="{i18n>title}">
+    <content>
+
+        <!--  Textos de las columnas  -->
+        <!--  <Table id="ordersTable" items="{odataService>Cantidades_producidas}"   -->
+           
+            <!--<Table id="ordTableTot" items="{odataService>Cantidades_producidas}"
+                mode="SingleSelectMaster" 
+                alternateRowColors="true">
+                <headerToolbar>
+                    <Toolbar>
+                        <Label text="{i18n>col9} : {sociedad}"/>
+                    </Toolbar>
+                </headerToolbar>´
+                <columns>
+                    <Column>
+                        <header>
+                            <Label text="{i18n>col2}" />
+                        </header>
+                    </Column>
+                </columns>
+            >
+            </Table>-->
+
+                <Table id="ordersTable" items="{odataService>Cantidades_producidas}"
+          
+                mode="SingleSelectMaster" 
+                alternateRowColors="true">
+                <headerToolbar>
+                    <Toolbar>
+                        <Label text="{i18n>col9} : {sociedad}"/>
+                    </Toolbar>
+                </headerToolbar>
+               <columns>
+                   <Column >
+                       <header> 
+                           <Label text="{i18n>col1}" />
+                       </header>
+                   </Column>
+                   <Column>
+                       <header>
+                           <Label text="{i18n>col2}" />
+                       </header>
+                   </Column>
+                   <Column>
+                       <header>
+                           <Label text="{i18n>col3}" />
+                       </header>
+                   </Column>
+                   <Column>
+                       <header>
+                           <Text text="{i18n>col4}" />
+                       </header>
+                   </Column>
+                   <Column>
+                       <header>
+                           <Label text="{i18n>col5}" />
+                       </header>
+                   </Column>
+                   <Column>
+                       <header>
+                           <Label text="{i18n>col6}" />
+                       </header>
+                   </Column>
+                   <Column>
+                       <header>
+                           <Label text="{i18n>col7}" />
+                       </header>
+                   </Column>
+               </columns>
+               <!-- Celdas con los valores de cada columna -->
+               <items>
+                <ColumnListItem>
+                    <cells>
+                        <!--<Text text="{odataService>cust_Maq}"/>-->
+                            <!--<Text text="{odataService>custManFac_Order}"/>-->
+                            
+                                
+                               <!-- <Text text="{Prod>ToHorasHombre/cust_Maq}"/> -->
+                       
+                                <Text text="{cust_Maq}"/>
+                                <Text text="{Prod>custManFac_Order}"/>
+             
+                    </cells>
+                </ColumnListItem>
+            </items>
+
+           </Table>
+        </content>
+</Page>
+</mvc:View>

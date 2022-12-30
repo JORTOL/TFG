@@ -1,0 +1,96 @@
+  METHOD totales_maquinas_get_entityset.
+
+
+    DATA: lt_ztpp0026_aux TYPE zcl_zppp_prodord_mpc=>tt_totales_maquina,
+          lt_ztpp0027_aux TYPE zcl_zppp_prodord_mpc=>tt_totales_maquina.
+
+    DATA: lv_tot_qua   TYPE zdepp_qtycaptor,
+          lv_tot_horas TYPE zdepp_manhours.
+
+    FIELD-SYMBOLS:  <ls_ztpp0026_aux> LIKE LINE OF et_entityset,
+                    <ls_ztpp0027_aux> LIKE LINE OF et_entityset.
+
+IF iv_filter_string IS NOT INITIAL.
+
+    CASE iv_entity_set_name.
+      WHEN 'Totales_maquinaSet'.
+
+        SELECT  custworkplace,custimpdate, custshift, custmanfac_order, qty_captor
+         INTO TABLE @DATA(lt_ztpp0026)
+         FROM ztpp0026
+         WHERE (iv_filter_string).
+
+        IF sy-subrc = 0.
+          SORT lt_ztpp0026 BY custworkplace.
+          LOOP AT lt_ztpp0026 ASSIGNING FIELD-SYMBOL(<ls_ztpp0026>).
+            lv_tot_qua = lv_tot_qua  + <ls_ztpp0026>-qty_captor.
+            AT END OF custworkplace.
+              APPEND INITIAL LINE TO lt_ztpp0026_aux ASSIGNING <ls_ztpp0026_aux>.
+              <ls_ztpp0026_aux>-custworkplace = <ls_ztpp0026>-custworkplace.
+              <ls_ztpp0026_aux>-custimpdate = <ls_ztpp0026>-custimpdate.
+              <ls_ztpp0026_aux>-custshift = <ls_ztpp0026>-custshift.
+              <ls_ztpp0026_aux>-custmanfac_order = <ls_ztpp0026>-custmanfac_order.
+              <ls_ztpp0026_aux>-cusct_qua_tot = lv_tot_qua.
+
+              CLEAR lv_tot_qua.
+            ENDAT.
+
+          ENDLOOP.
+
+          SELECT cust_maq, custimpdate, custshift, custmanfac_order, cust_worker, man_hours
+            FROM ztpp0027
+            INTO TABLE @DATA(lt_ztpp0027)
+            FOR ALL ENTRIES IN @lt_ztpp0026
+            WHERE custimpdate       = @lt_ztpp0026-custimpdate AND
+                  custshift         = @lt_ztpp0026-custshift   AND
+                  custmanfac_order  = @lt_ztpp0026-custmanfac_order.
+          IF sy-subrc = 0.
+            SORT lt_ztpp0027 BY cust_maq.
+            LOOP AT lt_ztpp0027 ASSIGNING FIELD-SYMBOL(<ls_ztpp0027>).
+              lv_tot_horas = lv_tot_horas + <ls_ztpp0027>-man_hours.
+              AT END OF cust_maq.
+                APPEND INITIAL LINE TO lt_ztpp0027_aux ASSIGNING <ls_ztpp0027_aux>.
+                <ls_ztpp0027_aux>-custworkplace    = <ls_ztpp0027>-cust_maq.
+                <ls_ztpp0027_aux>-custimpdate      = <ls_ztpp0027>-custimpdate.
+                <ls_ztpp0027_aux>-custshift        = <ls_ztpp0027>-custshift.
+                <ls_ztpp0027_aux>-custmanfac_order = <ls_ztpp0027>-custmanfac_order.
+                <ls_ztpp0027_aux>-man_hours        = lv_tot_horas.
+
+                CLEAR lv_tot_horas.
+              ENDAT.
+            ENDLOOP.
+          ENDIF.
+          LOOP AT lt_ztpp0026_aux ASSIGNING <ls_ztpp0026_aux>.
+            APPEND INITIAL LINE TO et_entityset ASSIGNING FIELD-SYMBOL(<ls_entity>).
+            <ls_entity>-custworkplace = <ls_ztpp0026_aux>-custworkplace.
+            <ls_entity>-cusct_qua_tot = <ls_ztpp0026_aux>-cusct_qua_tot.
+            <ls_entity>-custimpdate =  <ls_ztpp0026_aux>-custimpdate.
+            <ls_entity>-custshift = <ls_ztpp0026_aux>-custshift.
+            <ls_entity>-custmanfac_order = <ls_ztpp0026_aux>-custmanfac_order.
+*            READ TABLE lt_ztpp0027_aux WITH KEY custworkplace = <ls_ztpp0026_aux>-custworkplace ASSIGNING <ls_ztpp0027_aux> BINARY SEARCH.
+*            IF sy-subrc = 0.
+*              <ls_entity>-man_hours =  <ls_ztpp0027_aux>-man_hours.
+*            ENDIF.
+          ENDLOOP.
+          SORT et_entityset BY custworkplace.
+          LOOP AT lt_ztpp0026_aux ASSIGNING <ls_ztpp0026_aux>.
+            READ TABLE et_entityset WITH KEY custworkplace = <ls_ztpp0026_aux>-custworkplace ASSIGNING <ls_entity> BINARY SEARCH.
+            IF sy-subrc = 0.
+              <ls_entity>-man_hours =  <ls_ztpp0027_aux>-man_hours.
+            ELSE.
+              APPEND INITIAL LINE TO et_entityset ASSIGNING <ls_entity>.
+              <ls_entity>-custworkplace = <ls_ztpp0026_aux>-custworkplace.
+              <ls_entity>-man_hours =  <ls_ztpp0027_aux>-man_hours.
+              <ls_entity>-custimpdate =  <ls_ztpp0026_aux>-custimpdate.
+              <ls_entity>-custshift = <ls_ztpp0026_aux>-custshift.
+              <ls_entity>-custmanfac_order = <ls_ztpp0026_aux>-custmanfac_order.
+            ENDIF.
+          ENDLOOP.
+
+
+        ENDIF.
+    ENDCASE.
+
+ENDIF.
+
+  ENDMETHOD.
