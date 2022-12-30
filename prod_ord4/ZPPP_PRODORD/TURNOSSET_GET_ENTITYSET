@@ -1,0 +1,34 @@
+  method TURNOSSET_GET_ENTITYSET.
+
+    DATA: ls_key_tab TYPE /iwbep/s_mgw_name_value_pair.
+
+*   Comprobamos si viene por navegación desde la entidad Empresa
+    IF iv_source_name = 'Turnos'.
+
+******     Leemos la clave de las horas hombre
+
+      IF iv_filter_string IS NOT INITIAL.
+
+        SELECT *
+          INTO CORRESPONDING FIELDS OF TABLE et_entityset
+          FROM ztpp0028
+          WHERE (iv_filter_string) AND
+                spras = sy-langu.
+      ELSE.
+       SELECT *
+          INTO CORRESPONDING FIELDS OF TABLE et_entityset
+          FROM ztpp0028
+          WHERE spras = sy-langu.
+      ENDIF.
+
+
+    ELSE.
+    SELECT *
+          INTO CORRESPONDING FIELDS OF TABLE et_entityset
+          FROM ztpp0028
+          WHERE spras = sy-langu.
+    ENDIF.
+
+
+
+  endmethod.

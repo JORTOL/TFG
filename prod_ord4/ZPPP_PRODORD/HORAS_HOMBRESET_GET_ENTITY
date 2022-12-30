@@ -1,0 +1,14 @@
+  METHOD horas_hombreset_get_entity.
+
+    io_tech_request_context->get_converted_keys( IMPORTING es_key_values = er_entity ).
+
+    SELECT SINGLE *
+      INTO CORRESPONDING FIELDS OF er_entity
+      FROM ztpp0027
+      WHERE custimpdate       = er_entity-custimpdate       AND
+            custshift         = er_entity-custshift         AND
+            custmanfac_order  = er_entity-custmanfac_order  AND
+            cust_worker       = er_entity-cust_worker.
+
+
+  ENDMETHOD.

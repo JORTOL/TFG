@@ -1,0 +1,297 @@
+FUNCTION zfmpp_wbserviceorders.
+*"----------------------------------------------------------------------
+*"*"Interfase local
+*"  IMPORTING
+*"     VALUE(I_AUFNR_MIN) TYPE  AUFK-AUFNR
+*"     VALUE(I_AUFNR_MAX) TYPE  AUFK-AUFNR
+*"     VALUE(I_BUKRS) TYPE  BUKRS
+*"----------------------------------------------------------------------
+  TYPES: BEGIN OF ty_final,
+           name           TYPE string,
+           model          TYPE string,
+           manufacturer   TYPE string,
+           starship_class TYPE string,
+         END OF ty_final.
+
+  TYPES: BEGIN OF ty_token_request,
+           username TYPE string,
+           password TYPE string,
+         END OF ty_token_request.
+
+  TYPES: BEGIN OF ty_token_response,
+           token TYPE string,
+         END OF ty_token_response.
+
+  TYPES: BEGIN OF ty_result,
+           workplace           TYPE string,
+           fecha               TYPE string,
+           shift               TYPE i,
+           manufacturing_order TYPE string,
+           qty                 TYPE f,
+         END OF ty_result.
+
+
+  TYPES: ty_t_result TYPE STANDARD TABLE OF ty_result WITH EMPTY KEY.
+
+  TYPES: BEGIN OF t_result,
+           str(9999),
+         END   OF t_result.
+
+  TYPES:
+    BEGIN OF ty_stru,
+      success  TYPE i,
+      id_token TYPE string,
+    END OF ty_stru.
+  DATA:
+     out TYPE ty_stru .
+
+  DATA: lt_result TYPE ty_t_result,
+        ls_result TYPE ty_result.
+
+
+  DATA: lv_url                  TYPE string,
+        lv_body                 TYPE string,
+        token                   TYPE string,
+        lrc_xx                  TYPE REF TO cx_rest_client_exception,
+        li_client               TYPE REF TO if_http_client,
+        lt_errors               TYPE TABLE OF string,
+        lv_error_message        TYPE string,
+        lv_code                 TYPE i,
+        lv_reason               TYPE string,
+        lv_json_data            TYPE string,
+        lr_data                 TYPE REF TO data,
+        ls_final                TYPE ty_final,
+        lo_client               TYPE REF TO if_http_client,
+        lo_rest_client          TYPE REF TO cl_rest_http_client,
+        lo_request              TYPE REF TO if_rest_entity,
+        lv_response             TYPE string,
+        lr_json_serializer      TYPE REF TO cl_trex_json_serializer,
+        lo_response             TYPE REF TO if_rest_entity,
+        lt_final                TYPE TABLE OF ty_final,
+        ls_token_requset        TYPE ty_token_request,
+        ls_token_response       TYPE ty_token_response,
+        lv_error                TYPE string,
+        abap_response           TYPE string,
+        lv_content_length_value TYPE i,
+        gv_raw_response         TYPE string,
+        lv_xml_result_str       TYPE string,
+        lv_xmlrequest           TYPE string.
+
+
+
+  DATA: itab_result TYPE TABLE OF t_result WITH HEADER LINE.
+  DATA: lgv_access_token_str_found TYPE boole_d,
+        lgv_token_type_str_found   TYPE boole_d,
+        lv_expire_str_found        TYPE boole_d,
+        w_strlen                   TYPE i,
+        token_expire_seconds       TYPE char10,
+        lv_token_type              TYPE string.
+  DATA: lt_fields TYPE tihttpnvp.
+
+  DATA: lv_access_token  TYPE string.
+  DATA: lv_cdata TYPE string.
+
+
+  FIELD-SYMBOLS:
+    <data>         TYPE data,
+    <results>      TYPE any,
+    <structure>    TYPE any,
+    <table>        TYPE ANY TABLE,
+    <field>        TYPE any,
+    <field_value>  TYPE data,
+    <lt_data_json> TYPE ANY TABLE.
+
+
+  CONSTANTS: co_url      TYPE string VALUE 'http://tgrpmes01/Captor/Token/'.
+  CONSTANTS: co_turno TYPE c VALUE '1'.
+
+
+  CONCATENATE co_url i_bukrs INTO  lv_url.
+
+  ls_token_requset-username    = 'CAPTOR'.
+  ls_token_requset-password    = 'CAPTOR'.
+
+*NEW
+  cl_http_client=>create_by_url(
+    EXPORTING
+      url           = lv_url
+      ssl_id        = 'ANONYM'
+    IMPORTING
+      client        = lo_client
+    EXCEPTIONS
+      argument_not_found = 1
+      plugin_not_active  = 2
+      internal_error     = 3
+      OTHERS             = 4 ).
+
+
+  CALL METHOD lo_client->request->set_method(
+      method = 'POST' ).
+
+  lo_client->propertytype_accept_cookie = if_http_client=>co_enabled.
+
+  lo_client->propertytype_logon_popup = lo_client->co_disabled.
+
+
+  CALL METHOD lo_client->request->set_header_field
+    EXPORTING
+      name  = 'Content-Type'
+      value = 'application/json; charset=utf-8'.
+
+
+  CONCATENATE
+  '{'
+  '"userName":"' ls_token_requset-username
+              '","password":"' ls_token_requset-password
+              '"}'
+              INTO lv_cdata.
+
+
+
+  lv_content_length_value = strlen( lv_cdata ).
+*
+
+
+  lo_client->request->set_cdata( EXPORTING data = lv_cdata ).
+
+  lo_client->send(
+  EXPORTING
+    timeout = 15
+  EXCEPTIONS
+    http_communication_failure = 1
+    http_invalid_state         = 2
+    http_processing_failed     = 3
+    http_invalid_timeout       = 4
+    OTHERS                     = 5 ).
+  IF sy-subrc = 0.
+  ENDIF.
+
+
+  lo_client->receive(
+  EXCEPTIONS
+    http_communication_failure = 1
+    http_invalid_state         = 2
+    http_processing_failed     = 3
+    OTHERS                     = 4 ).
+  IF sy-subrc = 0.
+  ENDIF.
+
+* Refresh the Request after each POST:
+  CALL METHOD lo_client->refresh_request(
+    EXCEPTIONS
+      http_action_failed = 1
+      OTHERS             = 2 ).
+
+  lo_client->response->get_status(
+    IMPORTING
+      code = lv_code
+      reason = lv_reason ).
+
+
+  lv_xml_result_str = lo_client->response->get_cdata( ).
+  lv_xmlrequest = lo_client->request->get_cdata( ).
+
+
+
+  gv_raw_response = lo_client->response->get_raw_message( ).
+
+  DATA(it_header_fields) = VALUE tihttpnvp( ).
+  lo_client->response->get_header_fields( CHANGING fields = it_header_fields ).
+
+
+  DATA(gv_reason) = lo_client->response->get_data( ).
+
+  DATA(string_response) = cl_abap_codepage=>convert_from( gv_reason ).
+
+
+  sy-tmaxl = strlen( lv_xml_result_str ).
+
+  SPLIT lv_xml_result_str AT '"' INTO TABLE itab_result.
+  CLEAR: lgv_access_token_str_found,
+         lv_expire_str_found.
+
+  LOOP AT itab_result.
+    CASE itab_result-str.
+      WHEN 'access_token'.
+        lgv_access_token_str_found = abap_true.
+      WHEN 'expires_in'.
+        lv_expire_str_found = abap_true.
+      WHEN 'token_type'.
+        lgv_token_type_str_found = abap_true.
+      WHEN OTHERS.
+        IF  lgv_access_token_str_found EQ abap_true AND lv_access_token IS INITIAL.
+          w_strlen = strlen( itab_result-str ).
+          IF w_strlen > 30.
+            lv_access_token = itab_result-str.
+          ENDIF.
+        ENDIF.
+        IF lv_expire_str_found EQ abap_true AND token_expire_seconds IS INITIAL.
+          REPLACE ':' WITH space INTO itab_result-str.
+          REPLACE '#' WITH space INTO itab_result-str.
+          REPLACE '}' WITH space INTO itab_result-str.
+          SHIFT itab_result-str BY 1 PLACES RIGHT CIRCULAR.
+          WHILE itab_result-str(1) EQ space.
+            SHIFT itab_result-str BY 1 PLACES RIGHT CIRCULAR.
+          ENDWHILE.
+          itab_result-str(1) = ' '.
+          SHIFT itab_result-str LEFT DELETING LEADING space.
+          token_expire_seconds = itab_result-str.
+        ENDIF.
+        IF lgv_token_type_str_found EQ abap_true AND lv_token_type IS INITIAL.
+          IF itab_result-str NE ':' AND itab_result-str NE '#' AND itab_result-str NE '}'.
+            lv_token_type = itab_result-str.
+          ENDIF.
+        ENDIF.
+    ENDCASE.
+  ENDLOOP.
+
+  CLEAR lv_cdata.
+
+*** Obtener cantidadesZFMPP_GETWSHMAQASAP
+**  CALL FUNCTION 'ZFMPP_GETWSQTYASAP'
+**    EXPORTING
+**      i_bukrs              = i_bukrs
+**      i_token_type         = lv_token_type
+**      i_access_token       = lv_access_token.
+
+******** Obtener horas empleado
+*******  CALL FUNCTION 'ZFMPP_GETWSHHOMASAP'
+*******    EXPORTING
+*******      i_bukrs        = i_bukrs
+*******      i_token_type   = lv_token_type
+*******      i_access_token = lv_access_token.
+
+******* Cantidades producidas por OF/Fase
+******  CALL FUNCTION 'ZFMPP_GETWSQTYASAP'
+******    EXPORTING
+******      i_bukrs        = i_bukrs
+******      i_token_type   = lv_token_type
+******      i_access_token = lv_access_token.
+
+
+DATA: lo_prodord TYPE REF TO zcl_pp_prodord.
+
+
+CREATE OBJECT lo_prodord EXPORTING iv_bukrs     = i_bukrs
+                                   iv_aufnr_max = i_aufnr_max
+                                   iv_aufnr_min = i_aufnr_min.
+
+******************* Obtener horas empleado
+   CALL METHOD lo_prodord->get_data_wshhomasap
+    EXPORTING
+      ip_token_type   = lv_token_type
+      ip_access_token = lv_access_token.
+**************
+
+
+************************* Cantidades producidas por OF/Fase
+   CALL METHOD lo_prodord->get_data_wsqtyasap
+    EXPORTING
+      ip_token_type    = lv_token_type
+      ip_access_token  = lv_access_token.
+
+
+
+
+
+ENDFUNCTION.

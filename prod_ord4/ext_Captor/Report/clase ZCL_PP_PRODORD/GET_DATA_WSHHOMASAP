@@ -1,0 +1,257 @@
+  METHOD get_data_wshhomasap.
+
+    DATA: lv_url                  TYPE string,
+          lv_authorization        TYPE string,
+          lv_date                 TYPE string,
+          lv_day                  TYPE string,
+          lv_month                TYPE string,
+          lv_year                 TYPE string,
+          lv_date_conv            TYPE string,
+          lv_cdata                TYPE string,
+          lv_content_length_value TYPE i,
+          lv_code                 TYPE i,
+          lv_reason               TYPE string,
+          lv_xml_result_str       TYPE string,
+          lv_xmlrequest           TYPE string,
+          lv_raw_response         TYPE string,
+          lt_result               TYPE ty_t_result_hour,
+          ls_result               TYPE ty_result_hour,
+          lt_ztpp0027             TYPE TABLE OF ztpp0027.
+
+    DATA: lo_client          TYPE REF TO if_http_client.
+
+
+    DATA: lr_data            TYPE REF TO data.
+
+
+    FIELD-SYMBOLS: <data>        TYPE data,
+                   <results>     TYPE any,
+                   <table>       TYPE ANY TABLE,
+                   <structure>   TYPE any,
+                   <field>       TYPE any,
+                   <field_value> TYPE data.
+
+    CONCATENATE ip_token_type ip_access_token INTO lv_authorization SEPARATED BY space.
+    CONCATENATE co_url_data mv_bukrs INTO  lv_url.
+
+*NEW
+    cl_http_client=>create_by_url(
+      EXPORTING
+        url           = lv_url
+        ssl_id        = 'ANONYM'
+      IMPORTING
+        client        = lo_client
+      EXCEPTIONS
+        argument_not_found = 1
+        plugin_not_active  = 2
+        internal_error     = 3
+        OTHERS             = 4 ).
+
+
+
+
+    CALL METHOD lo_client->request->set_method(
+        method = 'POST' ).
+
+    lo_client->propertytype_accept_cookie = if_http_client=>co_enabled.
+
+    lo_client->propertytype_logon_popup = lo_client->co_disabled.
+
+******************************  lo_client->request->set_version( version = if_http_request=>co_protocol_version_1_1 ).
+
+
+    CALL METHOD lo_client->request->set_header_field
+      EXPORTING
+        name  = 'Authorization'
+        value = lv_authorization.
+
+
+
+    CALL FUNCTION 'CONVERT_DATE_TO_EXTERNAL'
+      EXPORTING
+        date_internal            = sy-datum
+      IMPORTING
+        date_external            = lv_date
+      EXCEPTIONS
+        date_internal_is_invalid = 1
+        OTHERS                   = 2.
+
+
+    SPLIT lv_date AT '.' INTO lv_day lv_month lv_year.
+    CONCATENATE lv_year '-' lv_month '-' lv_day INTO lv_date_conv.
+
+    REPLACE ALL OCCURRENCES OF '.' IN lv_date WITH '-'.
+
+
+    CONCATENATE
+    co_op_key
+     co_cia i_bukrs
+     co_f1 lv_date_conv
+     co_f2 lv_date_conv
+     co_turno_d co_turno
+     co_turno_h co_turno
+     co_cl_key
+                INTO lv_cdata.
+
+
+
+
+
+  lv_content_length_value = strlen( lv_cdata ).
+
+
+  lo_client->request->set_cdata( EXPORTING data = lv_cdata length = lv_content_length_value ).
+
+  lo_client->send(
+  EXPORTING
+    timeout = 15
+  EXCEPTIONS
+    http_communication_failure = 1
+    http_invalid_state         = 2
+    http_processing_failed     = 3
+    http_invalid_timeout       = 4
+    OTHERS                     = 5 ).
+  IF sy-subrc = 0.
+  ENDIF.
+
+
+  lo_client->receive(
+  EXCEPTIONS
+    http_communication_failure = 1
+    http_invalid_state         = 2
+    http_processing_failed     = 3
+    OTHERS                     = 4 ).
+  IF sy-subrc = 0.
+  ENDIF.
+
+
+  lo_client->response->get_status(
+    IMPORTING
+      code = lv_code
+      reason = lv_reason ).
+
+
+  lv_xml_result_str = lo_client->response->get_cdata( ).
+  lv_xmlrequest = lo_client->request->get_cdata( ).
+
+  lv_raw_response = lo_client->response->get_raw_message( ).
+
+  DATA(lv_reason_dat) = lo_client->response->get_data( ).
+
+
+  DATA(string_response) = cl_abap_codepage=>convert_from( lv_reason_dat ).
+
+
+
+
+  /ui2/cl_json=>deserialize( EXPORTING
+                                  json = lv_xml_result_str
+                                  pretty_name = /ui2/cl_json=>pretty_mode-camel_case
+                             CHANGING
+                                   data = lr_data  ).
+
+  IF lr_data IS BOUND.
+    ASSIGN lr_data->* TO <data>.
+    ASSIGN COMPONENT `RESULT` OF STRUCTURE <data> TO <results>.
+    ASSIGN <results>->* TO <table>.
+
+    LOOP AT <table> ASSIGNING <structure>.
+      ASSIGN <structure>->* TO <data>.
+
+      ASSIGN COMPONENT `WORKPLACE` OF STRUCTURE <data> TO <field>.
+      IF <field> IS ASSIGNED.
+        lr_data = <field>.
+        ASSIGN lr_data->* TO <field_value>.
+        IF <field_value> IS ASSIGNED.
+          ls_result-workplace = <field_value>.
+        ENDIF.
+      ENDIF.
+      UNASSIGN: <field>, <field_value>.
+
+      ASSIGN COMPONENT `IMPUTATION_DATE` OF STRUCTURE <data> TO <field>.
+      IF <field> IS ASSIGNED.
+        lr_data = <field>.
+        ASSIGN lr_data->* TO <field_value>.
+        IF <field_value> IS ASSIGNED.
+          ls_result-imputationdate = <field_value>.
+        ENDIF.
+      ENDIF.
+      UNASSIGN: <field>, <field_value>.
+
+      ASSIGN COMPONENT `SHIFT` OF STRUCTURE <data> TO <field>.
+      IF <field> IS ASSIGNED.
+        lr_data = <field>.
+        ASSIGN lr_data->* TO <field_value>.
+        IF <field_value> IS ASSIGNED.
+          ls_result-shift = <field_value>.
+        ENDIF.
+      ENDIF.
+      UNASSIGN: <field>, <field_value>.
+
+      ASSIGN COMPONENT `MANUFACTURING_ORDER` OF STRUCTURE <data> TO <field>.
+      IF <field> IS ASSIGNED.
+        lr_data = <field>.
+        ASSIGN lr_data->* TO <field_value>.
+        IF <field_value> IS ASSIGNED.
+          ls_result-manufacturingorder = <field_value>.
+        ENDIF.
+      ENDIF.
+      UNASSIGN: <field>, <field_value>.
+
+      ASSIGN COMPONENT `WORKER` OF STRUCTURE <data> TO <field>.
+      IF <field> IS ASSIGNED.
+        lr_data = <field>.
+        ASSIGN lr_data->* TO <field_value>.
+        IF <field_value> IS ASSIGNED.
+          ls_result-worker = <field_value>.
+        ENDIF.
+      ENDIF.
+      UNASSIGN: <field>, <field_value>.
+
+      ASSIGN COMPONENT `HORAS_HOMBRE` OF STRUCTURE <data> TO <field>.
+      IF <field> IS ASSIGNED.
+        lr_data = <field>.
+        ASSIGN lr_data->* TO <field_value>.
+        IF <field_value> IS ASSIGNED.
+          ls_result-horashombre = <field_value>.
+        ENDIF.
+      ENDIF.
+      UNASSIGN: <field>, <field_value>.
+
+      APPEND ls_result TO lt_result.
+      CLEAR ls_result.
+    ENDLOOP.
+  ENDIF.
+****
+*****Actualización base de datos:
+  IF lt_result[] IS NOT INITIAL.
+    LOOP AT lt_result ASSIGNING FIELD-SYMBOL(<ls_result>).
+      APPEND INITIAL LINE TO lt_ztpp0027 ASSIGNING FIELD-SYMBOL(<ls_ztpp0027>).
+      <ls_ztpp0027>-custshift         = <ls_result>-workplace.
+
+
+      SPLIT <ls_result>-imputationdate(10) AT '-' INTO lv_year lv_month lv_day.
+      CONCATENATE lv_year lv_month lv_day INTO lv_date.
+
+
+      <ls_ztpp0027>-custimpdate       = lv_date.
+      <ls_ztpp0027>-custshift         = <ls_result>-shift.
+      <ls_ztpp0027>-custmanfac_order  = <ls_result>-manufacturingorder.
+*      <ls_ztpp0026>-cusct_qua         = <ls_result>-qty.
+
+      <ls_ztpp0027>-cust_maq          = <ls_result>-workplace.
+      <ls_ztpp0027>-cust_worker       = <ls_result>-worker.
+      <ls_ztpp0027>-man_hours         = <ls_result>-horashombre.
+      <ls_ztpp0027>-bukrs             = i_bukrs.
+
+
+*      CUSTOMPRODEXP       "Contador
+*      CUST_MANFAC_PHASE   "Fase
+
+        MODIFY ztpp0027 FROM <ls_ztpp0027>.
+    ENDLOOP.
+
+  ENDIF.
+
+
+  ENDMETHOD.
