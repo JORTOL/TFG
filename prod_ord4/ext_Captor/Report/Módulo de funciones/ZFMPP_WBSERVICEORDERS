@@ -102,7 +102,7 @@ FUNCTION zfmpp_wbserviceorders.
     <lt_data_json> TYPE ANY TABLE.
 
 
-  CONSTANTS: co_url      TYPE string VALUE 'http://tgrpmes01/Captor/Token/'.
+  CONSTANTS: co_url      TYPE string.   /* Se borra la url de conexión al sistema Captor por motivos de seguridad.
   CONSTANTS: co_turno TYPE c VALUE '1'.
 
 
