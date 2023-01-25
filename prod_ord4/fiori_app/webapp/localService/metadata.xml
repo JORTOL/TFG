@@ -106,8 +106,8 @@
      <End EntitySet="Horas_hombreSet" Role="ToRole_QuantityHourMan"/>
     </AssociationSet>
    </EntityContainer>
-   <atom:link rel="self" href="http://TGRP2SAPFG.tolsa.com:8000/sap/opu/odata/sap/ZPPP_PRODORD_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
-   <atom:link rel="latest-version" href="http://TGRP2SAPFG.tolsa.com:8000/sap/opu/odata/sap/ZPPP_PRODORD_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
+   <atom:link rel="self" href="************/sap/opu/odata/sap/ZPPP_PRODORD_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
+   <atom:link rel="latest-version" href="******************/sap/opu/odata/sap/ZPPP_PRODORD_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
   </Schema>
  </edmx:DataServices>
 </edmx:Edmx>
