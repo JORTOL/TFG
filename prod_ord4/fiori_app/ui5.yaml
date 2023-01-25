@@ -17,7 +17,7 @@ server:
           url: https://ui5.sap.com
         backend:
           - path: /sap
-            url: http://tgrp2sapfg.tolsa.com:8000/
+            url: /* Se borra la url del servidor SAP de la compañía.
     - name: fiori-tools-appreload
       afterMiddleware: compression
       configuration:
