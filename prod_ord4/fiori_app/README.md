@@ -7,7 +7,7 @@
 |**Generation Platform**<br>Visual Studio Code|
 |**Floorplan Used**<br>simple|
 |**Service Type**<br>SAP System (ABAP On Premise)|
-|**Service URL**<br>http://tgrp2sapfg.tolsa.com:8000//sap/opu/odata/sap/ZPPP_PRODORD_SRV
+|**Service URL**<br>http://*****************//sap/opu/odata/sap/ZPPP_PRODORD_SRV
 |**Module Name**<br>prod_ord4|
 |**Application Title**<br>App Title|
 |**Namespace**<br>|
